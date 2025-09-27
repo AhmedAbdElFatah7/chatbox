@@ -1,5 +1,11 @@
 [build]
 builder = "NIXPACKS"
+
+# نحدد runtime المطلوب
+[build.nixpacks]
+runtime = "php@8.2"
+
+[build]
 buildCommand = "composer install --no-dev --optimize-autoloader && npm install && npm run build"
 
 [start]
