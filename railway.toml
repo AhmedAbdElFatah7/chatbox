@@ -1,0 +1,11 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "composer install --no-dev --optimize-autoloader && npm install && npm run build"
+
+[start]
+cmd = "php artisan serve --host=0.0.0.0 --port=8080"
+
+[variables]
+APP_ENV = "production"
+APP_DEBUG = "false"
+APP_URL="chatbox-production-561c.up.railway.app"
