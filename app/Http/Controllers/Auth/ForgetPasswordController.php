@@ -38,7 +38,7 @@ class ForgetPasswordController extends Controller
 
         Cache::put('otp_' . $email, $otp, now()->addMinutes(5));
 
-        Mail::to($email)->queue(new OtpMail($otp));
+        Mail::to($email)->send(new OtpMail($otp));
 
         return $this->success([], "OTP sent successfully", 200);
     }
