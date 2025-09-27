@@ -1,14 +1,6 @@
 [build]
-builder = "NIXPACKS"
-buildCommand = "composer install --no-dev --optimize-autoloader && npm install && npm run build"
+builder = "nixpacks"
 
-[build.nixpacks]
-runtime = "php@8.2"
-
-[start]
-cmd = "php artisan serve --host=0.0.0.0 --port=8080"
-
-[variables]
-APP_ENV = "production"
-APP_DEBUG = "false"
-APP_URL="chatbox-production-561c.up.railway.app"
+[nixpacks]
+[nixpacks.phases.setup]
+packages = ["php82", "php82Extensions.composer", "nginx", "nodejs_18", "npm-9_x"]
