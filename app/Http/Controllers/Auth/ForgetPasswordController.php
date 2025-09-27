@@ -12,15 +12,13 @@ use Illuminate\Support\Facades\Validator;
 use Brevo\Client\Api\TransactionalEmailsApi;
 use Brevo\Client\Configuration;
 use Brevo\Client\Model\SendSmtpEmail;
-use Illuminate\Support\Facades\Log;
-use GuzzleHttp\Client as GuzzleClient;
+use Illuminate\Support\Facades\View;
 
 class ForgetPasswordController extends Controller
 {
     use ApiResponse;
 public function sendOtp(Request $request)
 {
-    // ✅ Validate email
     $validator = Validator::make($request->all(), [
         'email' => 'required|email',
     ]);
@@ -30,49 +28,38 @@ public function sendOtp(Request $request)
     }
 
     $email = $request->email;
-
-    // ✅ Check if user exists
     $user = User::where('email', $email)->first();
+
     if (!$user) {
         return response()->json(['error' => 'User not found!'], 400);
     }
 
-    // ✅ Prevent spamming OTP
     if (Cache::has('otp_' . $email)) {
         return response()->json(['error' => 'OTP already sent!'], 400);
     }
 
-    // ✅ Generate OTP & Cache it
     $otp = rand(100000, 999999);
     Cache::put('otp_' . $email, $otp, now()->addMinutes(5));
 
-    // ✅ Send email using Brevo API
     try {
         $config = Configuration::getDefaultConfiguration()
             ->setApiKey('api-key', env('BREVO_API_KEY'));
-
         $apiInstance = new TransactionalEmailsApi(null, $config);
-
+        $htmlContent = View::make('emails.otp', ['otp' => $otp])->render();
         $sendSmtpEmail = new SendSmtpEmail([
             'subject' => 'Your OTP Code',
-            'sender' => [
-                'email' => env('MAIL_FROM_ADDRESS'),
-                'name' => env('MAIL_FROM_NAME')
-            ],
-            'to' => [
-                ['email' => $email]
-            ],
-            'htmlContent' => "<p>Your OTP code is: <strong>{$otp}</strong></p>",
+            'sender' => ['email' => env('MAIL_FROM_ADDRESS'), 'name' => env('MAIL_FROM_NAME')],
+            'to' => [['email' => $email]],
+            'htmlContent' => $htmlContent,
         ]);
 
         $apiInstance->sendTransacEmail($sendSmtpEmail);
 
         return response()->json(['message' => 'OTP sent successfully'], 200);
-
     } catch (\Exception $e) {
         return response()->json([
             'error' => 'Failed to send OTP',
-            'details' => $e->getMessage(), // 👈 يوضح الخطأ الحقيقي
+            'details' => $e->getMessage()
         ], 500);
     }
 }
