@@ -22,9 +22,9 @@ class VerificationController extends Controller
 
         if ($validator->fails()) {
             return $this->error(
+                $validator->errors(),
                 "Validation failed",
-                422,
-                $validator->errors()
+                422
             );
         }
         $email = $request->email;

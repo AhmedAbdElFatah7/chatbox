@@ -34,10 +34,6 @@ public function sendOtp(Request $request)
         return response()->json(['error' => 'User not found!'], 400);
     }
 
-    if (Cache::has('otp_' . $email)) {
-        return response()->json(['error' => 'OTP already sent!'], 400);
-    }
-
     $otp = rand(100000, 999999);
     Cache::put('otp_' . $email, $otp, now()->addMinutes(5));
 
@@ -73,9 +69,9 @@ public function sendOtp(Request $request)
 
         if ($validator->fails()) {
             return $this->error(
+                $validator->errors(),
                 "Validation failed",
-                422,
-                $validator->errors()
+                422
             );
         }
         $email = $request->email;
