@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Message;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Broadcasting\PrivateChannel; 
@@ -13,26 +14,41 @@ class MessageSent implements ShouldBroadcastNow
 
     public $message;
 
-    public function __construct($message)
+    public function __construct(Message $message)
     {
-        // $message ممكن يكون مصفوفة أو Model
         $this->message = $message;
     }
 
     public function broadcastOn()
     {
-        // استخدم PrivateChannel لو عايز توكن أو تحقق، أو Channel لو عام
-        return new PrivateChannel('chat');
-        // أو per room: return new PrivateChannel("chat.{$this->message->room_id}");
+        // Broadcast to both sender and receiver
+        return [
+            new PrivateChannel('chat.' . $this->message->sender_id),
+            new PrivateChannel('chat.' . $this->message->receiver_id),
+        ];
     }
 
     public function broadcastWith()
     {
         return [
-            'id' => $this->message->id ?? null,
-            'text' => $this->message->text ?? $this->message,
-            'user' => $this->message->user ?? null,
-            'created_at' => $this->message->created_at ?? now()->toDateTimeString(),
+            'id' => $this->message->id,
+            'message' => $this->message->message,
+            'sender_id' => $this->message->sender_id,
+            'receiver_id' => $this->message->receiver_id,
+            'sender' => [
+                'id' => $this->message->sender->id,
+                'name' => $this->message->sender->name,
+                'username' => $this->message->sender->username,
+                'image' => $this->message->sender->image,
+            ],
+            'receiver' => [
+                'id' => $this->message->receiver->id,
+                'name' => $this->message->receiver->name,
+                'username' => $this->message->receiver->username,
+                'image' => $this->message->receiver->image,
+            ],
+            'is_read' => $this->message->is_read,
+            'created_at' => $this->message->created_at->toDateTimeString(),
         ];
     }
 }

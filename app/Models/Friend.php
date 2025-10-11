@@ -20,4 +20,19 @@ class Friend extends Model
     {
         return $this->belongsTo(User::class, 'friend_id');
     }
+
+
+    public static function isFriend($userId1, $userId2)
+    {
+        return self::where(function ($query) use ($userId1, $userId2) {
+            $query->where('user_id', $userId1)
+                ->where('friend_id', $userId2);
+        })
+            ->orWhere(function ($query) use ($userId1, $userId2) {
+                $query->where('user_id', $userId2)
+                    ->where('friend_id', $userId1);
+            })
+            ->where('status', 'accepted')
+            ->exists();
+    }
 }

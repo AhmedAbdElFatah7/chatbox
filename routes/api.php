@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\ForgetPasswordController;
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Friends\FriendController;
+use App\Http\Controllers\Chat\ChatController;
 use Illuminate\Support\Facades\Mail;
 
 /*
@@ -37,5 +38,12 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/friends/accept', [FriendController::class, 'acceptRequest']);
     Route::get('/friends', [FriendController::class, 'myFriends']);
     Route::get('/friends/requests', [FriendController::class, 'friendRequests']);
+
+    // Chat routes
+    Route::post('/chat/send', [ChatController::class, 'sendMessage']);
+    Route::get('/chat/conversation', [ChatController::class, 'getConversation']);
+    Route::post('/chat/mark-read', [ChatController::class, 'markAsRead']);
+    Route::get('/chat/unread-count', [ChatController::class, 'getUnreadCount']);
+    Route::get('/chat/conversations', [ChatController::class, 'getRecentConversations']);
 
 });
